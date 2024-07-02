@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Link Rotator</title>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      function loadLinks() {
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open('GET', 'links.txt', true);
+          xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+              resolve(xhr.responseText.split('\n').filter(link => link.trim() !== ''));
+            } else if (xhr.readyState === 4) {
+              reject('Error loading links');
+            }
+          };
+          xhr.send();
+        });
+      }
+
+      function getNextLink(links) {
+        const userCounter = parseInt(localStorage.getItem('userCounter') || '0');
+        const link = links[userCounter % links.length];
+        localStorage.setItem('userCounter', userCounter + 1);
+        return link;
+      }
+
+      loadLinks().then(links => {
+        const linkContainer = document.getElementById('link-container');
+        linkContainer.innerHTML = getNextLink(links);
+      }).catch(error => {
+        console.error('Error fetching the links:', error);
+      });
+    });
+  </script>
+</head>
+<body>
+  <p>Наши поезда самые поездастые регистрация тут: <span id="link-container"></span></p>
+</body>
+</html>
